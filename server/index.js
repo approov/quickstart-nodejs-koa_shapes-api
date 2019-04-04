@@ -13,7 +13,6 @@ const https = require('http');
 
 const v0Router = require('./v0-routes');
 const v1Router = require('./v1-routes');
-const u2Router = require('./u2-routes');
 const v2Router = require('./v2-routes');
 
 const PORT = process.env.SERVER_PORT || 8081;
@@ -38,20 +37,36 @@ app.use(async (ctx, next) => {
   }
 });
 
-// handle v0 routes
+// handle default route
+
+const invite = `<!DOCTYPE html>
+  <html><body>
+    <h1>Approov Mobile App Authentication</h1>
+    <P>To learn more about how Approov protects your APIs from
+    malicious bots and tampered or fake apps, see
+    <a href="https://approov.io/docs">https://approov.io/docs</a>.</p>
+  </body></html>`;
+
+const router = new Router();
+
+router.get('/', async ctx => {
+  debug(`text: ${invite}`);
+  ctx.type = 'html';
+  ctx.body = invite;
+});
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+// handle v0 original routes
 
 app.use(v0Router.routes());
 app.use(v0Router.allowedMethods());
 
-// handle v1 routes
+// handle v1 unprotected routes
 
 app.use(v1Router.routes());
 app.use(v1Router.allowedMethods());
-
-// handle u2 (v2 unprotected) routes
-
-app.use(u2Router.routes());
-app.use(u2Router.allowedMethods());
 
 // handle v2 protected routes
 
