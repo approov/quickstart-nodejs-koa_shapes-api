@@ -1,0 +1,27 @@
+{
+  "name": "approov2-shapes-server-node-koa",
+  "version": "0.1.0",
+  "description": "Approov2 shapes API server example",
+  "author": "Skip Hovsmith",
+  "license": "Apache-2.0",
+  "licenseFilename": "LICENSE",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 jest --watchAll"
+  },
+  "dependencies": {
+    "dotenv": "^7.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.7.0",
+    "koa-logger": "^3.2.0",
+    "koa-router": "^7.4.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "jest": "^24.5.0",
+    "supertest": "^4.0.2"
+  }
+}
