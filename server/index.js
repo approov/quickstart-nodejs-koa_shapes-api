@@ -12,7 +12,7 @@ const fs = require('fs');
 const https = require('http');
 
 const v0Router = require('./v0-routes');
-const v1Router = require('./v1-routes');
+const v1Router = require('./v0-routes');
 const v2Router = require('./v2-routes');
 
 const PORT = process.env.SERVER_PORT || 8081;
