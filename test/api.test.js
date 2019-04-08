@@ -5,15 +5,14 @@ const fs = require('fs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const server = require('../server/index');
+const { httpServer: server } = require('../server/index');
 
-// close the server after all tests completed
+// close the service after all tests completed
 afterAll(() => {
   server.close();
 });
 
 const V = '/v2';
-
 describe(`get ${V}/`, () => {
   test('should return 404 (no root endpoint)', async () => {
     const response = await request(server).get(`${V}/`);

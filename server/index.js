@@ -6,17 +6,22 @@ const { debug } = require('./utils');
 const Koa = require('koa');
 const Router = require('koa-router');
 const logger = require('koa-logger');
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
+const { default: sslify, xForwardedProtoResolver: xfpResolver } = require('koa-sslify');
 const fs = require('fs');
-const https = require('http');
+const http = require('http');
+const https = require('https');
 
 const v0Router = require('./v0-routes');
-const v1Router = require('./v0-routes');
+const v1Router = require('./v1-routes');
 const v2Router = require('./v2-routes');
 
-const PORT = process.env.SERVER_PORT || 8081;
-const LOG = (process.env.SERVER_LOGGING || 'true') == 'true';
+const HTTP_PORT = process.env.HTTP_PORT || 80;
+const HTTPS_PORT = process.env.HTTPS_PORT || 443;
+const ENFORCE_HTTPS=(process.env.ENFORCE_HTTPS || 'true').toLowerCase() === 'true';
+const HTTPS_MODE=(process.env.HTTPS_MODE || 'direct').toLowerCase();
+const HTTPS_KEY=(process.env.HTTPS_KEY || '').toLowerCase();
+const HTTPS_CRT=(process.env.HTTPS_CRT || '').toLowerCase();
+const LOG = (process.env.ENABLE_LOGGING || 'true').toLowerCase() === 'true';
 const app = new Koa();
 
 // handle logging
@@ -73,21 +78,63 @@ app.use(v1Router.allowedMethods());
 app.use(v2Router.routes());
 app.use(v2Router.allowedMethods());
 
-// start server
+// start service
 
-const options = {
-  //key: fs.readFileSync('./vault/xxx.key'),
-  //cert: fs.readFileSync('./vault/xxx.crt')
-};
+let httpServer, httpsServer;
 
-const server = https.createServer(options, app.callback())
-    .listen({ port: PORT}, () => {
-      console.log(`Listening on port ${PORT}...`);
-    })
-    .on('error', err => {
-      console.error(`error: ${err}`);
-    });
+var options = {
+  key: fs.readFileSync(HTTPS_KEY),
+  cert: fs.readFileSync(HTTPS_CRT)
+}
 
-module.exports = server;
+if (HTTPS_MODE == 'direct') {
+  if (ENFORCE_HTTPS) {
+    app.use(sslify({
+      port: HTTPS_PORT
+    }));
+  }
+
+  httpServer = http.createServer(app.callback())
+  .listen({ port: HTTP_PORT}, () => {
+    console.log(`Listening on http port ${HTTP_PORT}...`);
+  })
+  .on('error', err => {
+    console.error(`error: ${err}`);
+  });
+
+  const options = {
+    key: fs.readFileSync(HTTPS_KEY),
+    cert: fs.readFileSync(HTTPS_CRT)
+  }
+  httpsServer = https.createServer(options, app.callback())
+  .listen({ port: HTTPS_PORT}, () => {
+    console.log(`Listening on http ports ${HTTPS_PORT}...`);
+  })
+  .on('error', err => {
+    console.error(`error: ${err}`);
+  });
+} else if (HTTPS_MODE == 'x-forwarded-proto') {
+  if (ENFORCE_HTTPS) {
+    app.use(sslify({
+      resolver: xfpResolver
+    }));
+  }
+
+  httpServer = http.createServer(app.callback())
+  .listen({ port: HTTP_PORT}, () => {
+    console.log(`Listening on http port ${HTTP_PORT}...`);
+  })
+  .on('error', err => {
+    console.error(`error: ${err}`);
+  });
+} else {
+  console.error(`ERROR: HTTPS_MODE \'${HTTPS_MODE}\' not recognized`);
+}
+
+// export service close function
+module.exports = {
+  httpServer,
+  httpsServer
+}
 
 // end of file

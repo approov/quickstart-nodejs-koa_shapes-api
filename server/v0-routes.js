@@ -6,7 +6,7 @@ const { debug } = require('./utils');
 const Router = require('koa-router');
 const { verifyToken, verifyTaggedToken } = require('./auth');
 
-const APPROOV_ENFORCE = (process.env.APPROOV_ENFORCEMENT || 'true') == 'true';
+const ENFORCE_APPROOV = (process.env.ENFORCE_APPROOV || 'true') == 'true';
 
 // handle routes
 
@@ -18,7 +18,7 @@ router.use('/shapes', async (ctx, next) => {
   const { valid, status } = verifyToken(ctx);
 
   if (!valid) {
-    if (APPROOV_ENFORCE) {
+    if (ENFORCE_APPROOV) {
       debug(`authorization failed: ${status} - error`);
       ctx.throw(400, status);
     } else {
