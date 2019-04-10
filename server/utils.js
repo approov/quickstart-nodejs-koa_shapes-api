@@ -1,8 +1,6 @@
 // shapes api server utilities
 
-require('dotenv').config();
-
-const LOG = (process.env.SERVER_LOGGING || 'true') == 'true';
+const LOG = (process.env.ENABLE_LOGGING || 'true') === 'true';
 
 // debugging
 

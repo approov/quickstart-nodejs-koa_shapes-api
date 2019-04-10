@@ -1,0 +1,6 @@
+node_modules
+npm-debug.log
+
+# don't embed local environment in image
+.env
+.env.docker

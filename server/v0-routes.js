@@ -1,7 +1,5 @@
 // shapes api server - v1 protected routes
 
-require('dotenv').config();
-
 const { debug } = require('./utils');
 const Router = require('koa-router');
 const { verifyToken, verifyTaggedToken } = require('./auth');
@@ -20,7 +18,7 @@ router.use('/shapes', async (ctx, next) => {
   if (!valid) {
     if (ENFORCE_APPROOV) {
       debug(`authorization failed: ${status} - error`);
-      ctx.throw(400, status);
+      ctx.throw(400);
     } else {
       debug(`authorization failed: ${status} - warning only`);
     }

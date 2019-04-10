@@ -1,7 +1,5 @@
 // shapes api server - v2 protected routes
 
-require('dotenv').config();
-
 const { debug } = require('./utils');
 const Router = require('koa-router');
 const { verifyToken, verifyTaggedToken } = require('./auth');

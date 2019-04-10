@@ -1,6 +1,8 @@
 // shapes api server
 
-require('dotenv').config();
+const env = require('dotenv');
+env.config({path: '.env'})
+env.config({path: '.env.default'});
 
 const { debug } = require('./utils');
 const Koa = require('koa');
@@ -19,8 +21,8 @@ const HTTP_PORT = process.env.HTTP_PORT || 80;
 const HTTPS_PORT = process.env.HTTPS_PORT || 443;
 const ENFORCE_HTTPS=(process.env.ENFORCE_HTTPS || 'true').toLowerCase() === 'true';
 const HTTPS_MODE=(process.env.HTTPS_MODE || 'direct').toLowerCase();
-const HTTPS_KEY=(process.env.HTTPS_KEY || '').toLowerCase();
-const HTTPS_CRT=(process.env.HTTPS_CRT || '').toLowerCase();
+const HTTPS_KEY=Buffer.from(process.env.HTTPS_KEY || '', 'base64');
+const HTTPS_CRT=Buffer.from(process.env.HTTPS_CRT || '', 'base64');
 const LOG = (process.env.ENABLE_LOGGING || 'true').toLowerCase() === 'true';
 const app = new Koa();
 
@@ -82,11 +84,6 @@ app.use(v2Router.allowedMethods());
 
 let httpServer, httpsServer;
 
-var options = {
-  key: fs.readFileSync(HTTPS_KEY),
-  cert: fs.readFileSync(HTTPS_CRT)
-}
-
 if (HTTPS_MODE == 'direct') {
   if (ENFORCE_HTTPS) {
     app.use(sslify({
@@ -102,11 +99,7 @@ if (HTTPS_MODE == 'direct') {
     console.error(`error: ${err}`);
   });
 
-  const options = {
-    key: fs.readFileSync(HTTPS_KEY),
-    cert: fs.readFileSync(HTTPS_CRT)
-  }
-  httpsServer = https.createServer(options, app.callback())
+  httpsServer = https.createServer({key: HTTPS_KEY, cert: HTTPS_CRT}, app.callback())
   .listen({ port: HTTPS_PORT}, () => {
     console.log(`Listening on http ports ${HTTPS_PORT}...`);
   })

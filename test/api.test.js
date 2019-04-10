@@ -13,6 +13,7 @@ afterAll(() => {
 });
 
 const V = '/v2';
+
 describe(`get ${V}/`, () => {
   test('should return 404 (no root endpoint)', async () => {
     const response = await request(server).get(`${V}/`);
@@ -29,7 +30,7 @@ describe(`get ${V}/hello`, () => {
   });
 });
 
-const approovSecret = Buffer.from(fs.readFileSync(process.env.APPROOV_SECRET), 'base64');
+const approovSecret = Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'approov-token';
 
 const approovTagHeader = 'approov-tag';
