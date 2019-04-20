@@ -26,7 +26,7 @@ router.get('/shapes', async ctx => {
   debug(`shape: ${shape}`);
   ctx.body = {
     shape,
-    status: `${shape}: unprotected`
+    status: `${shape} (unprotected)`
   };
 });
 
@@ -37,7 +37,7 @@ router.get('/forms', async ctx => {
   debug(`form: ${form}`);
   ctx.body = {
     form,
-    status: `${form}: unprotected`
+    status: `${form} (unprotected)`
   };
 });
 

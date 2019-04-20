@@ -67,7 +67,7 @@ router.get('/shapes', async ctx => {
   debug(`shape: ${shape}`);
   ctx.body = {
     shape,
-    status: `${shape}`
+    status: `${shape} (approoved)`
   };
 });
 
@@ -78,7 +78,7 @@ router.get('/forms', async ctx => {
   debug(`form: ${form}`);
   ctx.body = {
     form,
-    status: `${form}`
+    status: `${form} (approoved)`
   };
 });
 

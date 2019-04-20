@@ -8,6 +8,7 @@ const fs = require('fs');
 const APPROOV_SECRET=Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'approov-token';
 const approovTagHeader = 'approov-tag';
+const authenticationHeader = 'authentication'
 
 const verifyToken = (ctx) => {
   debug('check Approov token');
@@ -46,9 +47,17 @@ const verifyTaggedToken = (ctx) => {
   }
 
   debug(`approov-tag: claim ${payClaim}`);
-  const approovTag = ctx.headers[approovTagHeader];
+  let approovTag = ctx.headers[approovTagHeader];
   if (!approovTag) {
-    return { valid: false, status: 'missing approov tag' };
+    approovTag = ctx.headers[authenticationHeader];
+    if (!approovTag) {
+      return { valid: false, status: 'missing approov tag' };
+    }
+    const split = approovTag.split(/\s(.+)/);
+    if (split.length < 2 || split[0].toLowerCase() !== 'bearer') {
+      return { valid: false, status: 'invalid bearer auth' };
+    }
+    approovTag = split[1];
   }
   const tagHash = crypto.createHash('sha256').update(approovTag).digest('base64');
   if (tagHash != payClaim) {

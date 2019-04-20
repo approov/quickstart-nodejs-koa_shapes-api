@@ -34,6 +34,7 @@ const approovSecret = Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'approov-token';
 
 const approovTagHeader = 'approov-tag';
+const authenticationHeader = 'authentication';
 const approovTag = 'APPROOV_TAG';
 const payClaim = crypto.createHash('sha256').update(approovTag).digest('base64');
 
@@ -122,6 +123,19 @@ describe(`get ${V}/forms`, () => {
     expect(forms).toContain(response.body.form);
   });
 
+  test('should respond with form (matching authentication claim)', async () => {
+    const approovToken = jwt.sign({'pay': payClaim}, approovSecret, {expiresIn: '1h'});
+
+    const response = await request(server)
+      .get(`${V}/forms`)
+      .set(authenticationHeader, `bearer ${approovTag}`)
+      .set(approovTokenHeader, approovToken);
+    
+    expect(response.status).toEqual(200);
+    expect(response.type).toEqual('application/json');
+    expect(forms).toContain(response.body.form);
+  });
+  
   test('should respond with form (no claim)', async () => {
     const approovToken = jwt.sign({}, approovSecret, {expiresIn: '1h'});
 
