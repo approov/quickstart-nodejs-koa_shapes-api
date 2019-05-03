@@ -2,7 +2,7 @@
 
 const { debug } = require('./utils');
 const Router = require('koa-router');
-const { verifyToken, verifyTaggedToken } = require('./auth');
+const { verifyToken, verifyBoundToken } = require('./auth');
 
 const ENFORCE_APPROOV = (process.env.ENFORCE_APPROOV || 'true') == 'true';
 
@@ -32,7 +32,7 @@ router.use('/shapes', async (ctx, next) => {
 });
 
 router.use(['/forms'], async (ctx, next) => {
-  const { valid, status } = verifyTaggedToken(ctx);
+  const { valid, status } = verifyBoundToken(ctx);
 
   if (!valid) {
     if (ENFORCE_APPROOV) {
@@ -56,7 +56,7 @@ router.get('/hello', async ctx => {
   debug(`text: ${hello}`);
   ctx.body = {
     text: hello,
-    status: hello
+    status: `${hello} (healthy)`
   };
 });
 

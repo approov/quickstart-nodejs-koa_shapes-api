@@ -31,12 +31,10 @@ describe(`get ${V}/hello`, () => {
 });
 
 const approovSecret = Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
-const approovTokenHeader = 'approov-token';
-
-const approovTagHeader = 'approov-tag';
-const authenticationHeader = 'authentication';
-const approovTag = 'APPROOV_TAG';
-const payClaim = crypto.createHash('sha256').update(approovTag).digest('base64');
+const approovTokenHeader = 'Approov-Token';
+const authenticationHeader = 'Authentication';
+const bindingData = 'BINDING_DATA';
+const payClaim = crypto.createHash('sha256').update(bindingData).digest('base64');
 
 const shapes = [ 'Circle', 'Rectangle', 'Square', 'Triangle' ];
 
@@ -85,7 +83,7 @@ describe(`get ${V}/shapes`, () => {
 
     const response = await request(server)
       .get(`${V}/shapes`)
-      .set(approovTagHeader, approovTag)
+      .set(authenticationHeader, `Bearer ${bindingData}`)
       .set(approovTokenHeader, approovToken);
         
       expect(response.status).toEqual(200);
@@ -98,7 +96,7 @@ describe(`get ${V}/shapes`, () => {
 
     const response = await request(server)
       .get(`${V}/shapes`)
-      .set(approovTagHeader, approovTag)
+      .set(authenticationHeader, `Bearer X${bindingData}X`)
       .set(approovTokenHeader, approovToken);
         
       expect(response.status).toEqual(200);
@@ -115,20 +113,7 @@ describe(`get ${V}/forms`, () => {
 
     const response = await request(server)
       .get(`${V}/forms`)
-      .set(approovTagHeader, approovTag)
-      .set(approovTokenHeader, approovToken);
-    
-    expect(response.status).toEqual(200);
-    expect(response.type).toEqual('application/json');
-    expect(forms).toContain(response.body.form);
-  });
-
-  test('should respond with form (matching authentication claim)', async () => {
-    const approovToken = jwt.sign({'pay': payClaim}, approovSecret, {expiresIn: '1h'});
-
-    const response = await request(server)
-      .get(`${V}/forms`)
-      .set(authenticationHeader, `bearer ${approovTag}`)
+      .set(authenticationHeader, `Bearer ${bindingData}`)
       .set(approovTokenHeader, approovToken);
     
     expect(response.status).toEqual(200);
@@ -141,7 +126,7 @@ describe(`get ${V}/forms`, () => {
 
     const response = await request(server)
       .get(`${V}/forms`)
-      .set(approovTagHeader, approovTag)
+      .set(authenticationHeader, `Bearer ${bindingData}`)
       .set(approovTokenHeader, approovToken);
     
     expect(response.status).toEqual(200);
@@ -154,7 +139,7 @@ describe(`get ${V}/forms`, () => {
 
     const response = await request(server)
       .get(`${V}/forms`)
-      .set(approovTagHeader, approovTag)
+      .set(authenticationHeader, `Bearer X${bindingData}X`)
       .set(approovTokenHeader, approovToken);
     
     expect(response.status).toEqual(400);

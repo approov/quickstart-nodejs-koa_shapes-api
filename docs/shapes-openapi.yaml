@@ -1,0 +1,107 @@
+openapi: 3.0.0
+servers:
+  - description: Approov Shapes Demo Server (v2)
+    url: https://shapes.approov.io/v2
+info:
+  description: A simple API which demonstrates API security using Approov.
+  version: "2.0.0"
+  title: Approov Shapes API
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApproovAuth:
+      type: apiKey
+      in: header
+      name: Approov-Token
+paths:
+  /hello:
+    get:
+      summary: Checks connection health
+      description: No Approov protection is required
+      responses:
+        '200':
+          description: Indicates a healthy connection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hello:
+                    type: string
+                    enum:
+                      - Hello, World!
+                  status:
+                    type: string
+                required:
+                  - hello
+  /shapes:
+    get:
+      summary: Requests a shape
+      description: Requires a valid Approov token
+      security:
+        - ApproovAuth: []
+      responses:
+        '200':
+          description: Returns a random shape name
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shape:
+                    type: string
+                    enum:
+                      - circle
+                      - rectangle
+                      - square
+                      - triangle
+                  status:
+                    type: string
+                required:
+                  - shape
+        '400':
+          description: Indicates a bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /forms:
+    get:
+      summary: Requests a form
+      description: Requires a valid and optionally bound Approov token
+      security:
+        - BearerAuth: []
+        - ApproovAuth: []
+      responses:
+        '200':
+          description: Returns a random form name
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  form:
+                    type: string
+                    enum:
+                      - box
+                      - cone
+                      - cube
+                      - sphere
+                  status:
+                    type: string
+                required:
+                  - shape
+        '400':
+          description: Indicates a bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
