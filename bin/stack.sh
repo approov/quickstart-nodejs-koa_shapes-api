@@ -33,7 +33,7 @@ Main()
                     --rm \
                     -it \
                     --name shapes-node-koa \
-                    --publish  5000:5000 \
+                    --publish  8002:8002 \
                     --publish  8003:8003 \
                     --volume $PWD/.env:/home/node/app/.env \
                     --volume $PWD/server:/home/node/app/server \
