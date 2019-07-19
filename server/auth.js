@@ -7,7 +7,7 @@ const fs = require('fs');
 
 const APPROOV_SECRET=Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'Approov-Token'.toLowerCase();
-const authenticationHeader = 'Authentication'.toLowerCase();
+const authenticationHeader = 'Authorization'.toLowerCase();
 
 const verifyToken = (ctx) => {
   debug('check Approov token');
