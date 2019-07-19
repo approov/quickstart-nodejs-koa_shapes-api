@@ -2,12 +2,30 @@
 
 set -eu
 
+Show_Help()
+{
+    echo && cat ./docs/docker-stack-usage-help.txt && echo
+}
+
 Main()
 {
+    local shell_user=node
+
     for input in  in "${@}"; do
         case "${input}" in
+
+            -h | --help )
+                Show_Help
+            ;;
+
+            -u | --user )
+                local shell_user=${2? Missing user name.}
+            ;;
+
             build )
                 sudo docker build --tag approov2/shapes-node-koa .
+
+                exit 0
             ;;
 
             up )
@@ -27,11 +45,16 @@ Main()
             shell )
                 sudo docker exec \
                     -it \
+                    --user "${shell_user}" \
                     shapes-node-koa \
                     bash
+
+                exit 0
             ;;
         esac
     done
+
+    Show_Help
 }
 
 Main "${@}"
