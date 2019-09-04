@@ -2,6 +2,43 @@
 
 Approov 2 shapes server using node.js with koa.
 
+## USAGE
+
+```
+$ ./stack --help
+
+DOCKER STACK CLI WRAPPER
+
+This bash script is a wrapper around docker commands to build and run the nodejs server.
+
+Signature:
+  ./stack [options] <command>
+
+
+Usage:
+  ./stack
+  ./stack [-h | --help] [-u | --user] <command>
+
+
+Options:
+  -h | --help  Shows this help.
+  -u | --user  Set the user to use when obtaining a shell in the running docker container.
+
+
+Commands/Args:
+  build     Builds the docker image for this stack:
+              ./stack build
+
+  up        Starts the nodejs server:
+              ./stack up
+
+  shell     Starts a shell in the running container:
+              ./stack shell
+              ./stack --user root shell
+```
+
+## LICENSE
+
 ----
 
 Copyright 2019 CriticalBlue, Ltd.

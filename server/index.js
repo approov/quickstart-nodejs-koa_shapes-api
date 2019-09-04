@@ -85,11 +85,27 @@ app.use(v2Router.allowedMethods());
 let httpServer, httpsServer;
 
 if (HTTPS_MODE == 'direct') {
-  if (ENFORCE_HTTPS) {
+
+  console.log("Starting server in direct mode...")
+
+  if (ENFORCE_HTTPS && (HTTPS_KEY.length === 0 || HTTPS_CRT.length === 0)) {
+    console.error("ERROR: Enforce HTTPS is enable but is missing the certificate key pair.")
+  } else if (ENFORCE_HTTPS) {
+    console.log("Starting server on HTTPS port %s", HTTPS_PORT);
     app.use(sslify({
       port: HTTPS_PORT
     }));
+
+    httpsServer = https.createServer({key: HTTPS_KEY, cert: HTTPS_CRT}, app.callback())
+    .listen({ port: HTTPS_PORT}, () => {
+      console.log(`Listening on HTTPS port ${HTTPS_PORT}...`);
+    })
+    .on('error', err => {
+      console.error(`error: ${err}`);
+    });
   }
+
+  console.log("Starting server on http port %s", HTTP_PORT);
 
   httpServer = http.createServer(app.callback())
   .listen({ port: HTTP_PORT}, () => {
@@ -99,13 +115,6 @@ if (HTTPS_MODE == 'direct') {
     console.error(`error: ${err}`);
   });
 
-  httpsServer = https.createServer({key: HTTPS_KEY, cert: HTTPS_CRT}, app.callback())
-  .listen({ port: HTTPS_PORT}, () => {
-    console.log(`Listening on http ports ${HTTPS_PORT}...`);
-  })
-  .on('error', err => {
-    console.error(`error: ${err}`);
-  });
 } else if (HTTPS_MODE == 'x-forwarded-proto') {
   if (ENFORCE_HTTPS) {
     app.use(sslify({
