@@ -1,8 +1,10 @@
 // shapes api server
 
 const env = require('dotenv');
-env.config({path: '.env'})
+
+// ORDER OF THE ENV FILES MATTERS
 env.config({path: '.env.default'});
+env.config({path: '.env'})
 
 const { debug } = require('./utils');
 const Koa = require('koa');
