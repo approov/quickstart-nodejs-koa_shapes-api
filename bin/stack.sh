@@ -11,6 +11,11 @@ Main()
 {
     local shell_user=node
 
+    if [ ! -f ./.env ]; then
+        printf "\nMissing the .env file. Please follow the instructions at:\n\nhttps://github.com/approov/quickstart-nodejs-koa_shapes-api#configure-the-environment\n\n"
+        exit 1
+    fi
+
     for input in  in "${@}"; do
         case "${input}" in
 
@@ -32,6 +37,7 @@ Main()
                 sudo docker run \
                     --rm \
                     -it \
+                    --env-file .env \
                     --name shapes-node-koa \
                     --publish  8002:8002 \
                     --publish  8003:8003 \
