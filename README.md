@@ -81,7 +81,7 @@ Commands/Args:
 
 ## POSTMAN COLLECTION
 
-The Shapes API can be tested in Localhost or in a Production staging server with [this Postman collection](https://raw.githubusercontent.com/approov/postman-collections/master/shapes-api/shapes-api.postman_collection.json).
+The Shapes API can be tested in Localhost or in a Production staging server with [this Postman collection](https://raw.githubusercontent.com/approov/postman-collections/master/quickstarts/shapes-api/shapes-api.postman_collection.json).
 
 To use it you will need to start the server with this `.env` file:
 
