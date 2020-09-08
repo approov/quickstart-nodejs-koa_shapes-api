@@ -11,7 +11,7 @@ Create a `.env` file in the root of this project:
 ```bash
 # Used to start the NodeJS Koa server and to tell Traefik what port to use to
 # reach the server in the docker network for Traefik, thus this port it's
-# internal and never exposed to the host machine or to the internet.
+# internal and never exposed to the host machine or the internet.
 HTTP_PORT=8002
 
 # The domain that Traefik will be listening for https requests on port 443. All
@@ -51,7 +51,7 @@ $ ./stack --help
 
 DOCKER STACK CLI WRAPPER
 
-This bash script is a wrapper around docker commands to build and run the nodejs server.
+This bash script is a wrapper around docker commands to build and run the NodeJS server.
 
 Signature:
   ./stack [options] <command>
@@ -97,7 +97,7 @@ APPROOV_SECRET=h+CX0tOzdAAR9l15bWAqvq7w9olk66daIH+Xk+IAHhVVHszjDzeGobzNnqyRze3lw
 
 Please adjust `shapes.staging.demo.approov.io` to the domain being used by your server.
 
-You can use these same Postman collection to test the Production server, but then you need to manually update the `Approov-Token` header for each valid request example in the collection with an example token from the Approov CLI:
+You can use this same Postman collection to test the Production server, but then you need to manually update the `Approov-Token` header for each valid request example in the collection with an example token from the Approov CLI:
 
 ```
 approov token -genExample shapes.approov.io
