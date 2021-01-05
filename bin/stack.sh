@@ -2,13 +2,47 @@
 
 set -eu
 
-Show_Help()
-{
+Show_Help() {
     echo && cat ./docs/docker-stack-usage-help.txt && echo
 }
 
-Main()
-{
+Build_Docker_Image() {
+  sudo docker build -t approov2/shapes-node-koa:dev .
+}
+
+Create_Docker_Container() {
+
+    local _command="${1:-zsh}"
+    local _user="${2? Missing user name or uid for the container we want to stop!!!}"
+    local _port="${3? Missing http port for the container we want to stop!!!}"
+    local _container_name="nodejs-koa-dev"
+
+    sudo docker run \
+        -it \
+        --rm \
+        --user "${_user}" \
+        --env-file .env \
+        --env "HTTP_PORT=${_port}" \
+        --name "${_container_name}" \
+        --publish "127.0.0.1:${_port}:${_port}" \
+        --workdir "/home/node/app" \
+        --volume "$PWD:/home/node/app" \
+        approov2/shapes-node-koa:dev ${_command}
+}
+
+Stop_Docker_Container() {
+    local _user="${1? Missing user name or uid for the container we want to stop!!!}"
+    local _port="${2? Missing http port for the container we want to stop!!!}"
+    local _container_name="nodejs-koa-dev"
+
+    sudo docker container stop "${_container_name}"
+}
+
+Main() {
+    local CONTAINER_USER="$(id -u)"
+
+    local HTTP_PORT=8002
+
     local shell_user=node
 
     if [ ! -f ./.env ]; then
@@ -16,48 +50,38 @@ Main()
         exit 1
     fi
 
-    for input in  in "${@}"; do
-        case "${input}" in
-
-            -h | --help )
-                Show_Help
-            ;;
-
-            -u | --user )
-                local shell_user=${2? Missing user name.}
-            ;;
-
-            build )
-                sudo docker build --tag approov2/shapes-node-koa .
-
-                exit 0
-            ;;
-
-            up )
-                sudo docker run \
-                    --rm \
-                    -it \
-                    --env-file .env \
-                    --name shapes-node-koa \
-                    --publish  8002:8002 \
-                    --publish  8003:8003 \
-                    --volume $PWD/.env:/home/node/app/.env \
-                    --volume $PWD/server:/home/node/app/server \
-                    approov2/shapes-node-koa
-
-                exit 0
-            ;;
-
-            shell )
-                sudo docker exec \
-                    -it \
-                    --user "${shell_user}" \
-                    shapes-node-koa \
-                    bash
-
-                exit 0
-            ;;
-        esac
+    for input in "${@}"
+        do
+            case "${input}" in
+                build)
+                    Build_Docker_Image
+                    exit 0
+                    ;;
+                -p | --port)
+                    HTTP_PORT="${2? Missing HTTP port to access the container in localhost}"
+                    shift 2
+                    ;;
+                -u | --user)
+                    CONTAINER_USER="${2? Missing user name or uid to use inside the container}"
+                    shift 2
+                    ;;
+                up)
+                    Create_Docker_Container "npm start" "${CONTAINER_USER}" "${HTTP_PORT}"
+                    exit 0
+                    ;;
+                stop)
+                    Stop_Docker_Container "${CONTAINER_USER}" "${HTTP_PORT}"
+                    exit 0
+                    ;;
+                shell)
+                    Create_Docker_Container "${2:-bash}" "${CONTAINER_USER}" "${HTTP_PORT}"
+                    exit 0
+                    ;;
+                -h | --help)
+                    Show_Help
+                    exit 0
+                    ;;
+            esac
     done
 
     Show_Help

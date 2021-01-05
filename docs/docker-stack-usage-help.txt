@@ -13,7 +13,8 @@ Usage:
 
 Options:
   -h | --help  Shows this help.
-  -u | --user  Set the user to use when obtaining a shell in the running docker container.
+  -p | --port  The host port to access the docker container.
+  -u | --user  Set the user to use in the docker container.
 
 
 Commands/Args:
@@ -22,7 +23,9 @@ Commands/Args:
 
   up        Starts the nodejs server:
               ./stack up
+              ./stack --port 3000 up
 
-  shell     Starts a shell in the running container:
+  shell     Starts a shell in the docker container:
               ./stack shell
               ./stack --user root shell
+              ./stack --port 3000 --user root shell
