@@ -7,7 +7,7 @@ Show_Help() {
 }
 
 Build_Docker_Image() {
-  sudo docker build -t approov2/shapes-node-koa:dev .
+  sudo docker build -t "${DOCKER_IMAGE}" .
 }
 
 Create_Docker_Container() {
@@ -27,7 +27,7 @@ Create_Docker_Container() {
         --publish "127.0.0.1:${_port}:${_port}" \
         --workdir "/home/node/app" \
         --volume "$PWD:/home/node/app" \
-        approov2/shapes-node-koa:dev ${_command}
+        "${DOCKER_IMAGE}" ${_command}
 }
 
 Stop_Docker_Container() {
@@ -46,7 +46,15 @@ Main() {
     local shell_user=node
 
     if [ ! -f ./.env ]; then
-        printf "\nMissing the .env file. Please follow the instructions at:\n\nhttps://github.com/approov/quickstart-nodejs-koa_shapes-api#configure-the-environment\n\n"
+        printf "\n---> Missing the .env file. Please follow the instructions at:\n\nhttps://github.com/approov/quickstart-nodejs-koa_shapes-api#configure-the-environment\n\n"
+        exit 1
+    fi
+
+    # source all the environment variables to be available in the script
+    . ./.env
+
+    if [ -z "${DOCKER_IMAGE+x}" ]; then
+        printf "\n---> Missing value for DOCKER_IMAGE env var.\n\n"
         exit 1
     fi
 

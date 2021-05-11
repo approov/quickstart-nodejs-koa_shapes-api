@@ -3,7 +3,7 @@ version: "2.3"
 services:
 
   node:
-    image: approov2/shapes-node-koa
+    image: ${DOCKER_IMAGE? Missing value for DOCKER_IMAGE env var!}
     build: .
     restart: always
     env_file:
