@@ -52,7 +52,9 @@ RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 
 # Copy app source into the docker image with the correct ownership
-COPY --chown=node:node . .
+COPY --chown=node:node ./server ./server
+COPY --chown=node:node ./package.json ./package.json
+COPY --chown=node:node ./package-lock.json ./package-lock.json
 
 RUN \
   npm install && \
