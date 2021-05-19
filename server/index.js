@@ -8,6 +8,7 @@ env.config({path: '.env'})
 
 const { debug } = require('./utils');
 const Koa = require('koa');
+const cors = require('@koa/cors');
 const Router = require('koa-router');
 const logger = require('koa-logger');
 const { default: sslify, xForwardedProtoResolver: xfpResolver } = require('koa-sslify');
@@ -27,6 +28,7 @@ const HTTPS_KEY=Buffer.from(process.env.HTTPS_KEY || '', 'base64');
 const HTTPS_CRT=Buffer.from(process.env.HTTPS_CRT || '', 'base64');
 const LOG = (process.env.ENABLE_LOGGING || 'true').toLowerCase() === 'true';
 const app = new Koa();
+app.use(cors());
 
 // handle logging
 

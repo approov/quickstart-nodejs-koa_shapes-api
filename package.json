@@ -11,6 +11,7 @@
     "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 jest --watchAll"
   },
   "dependencies": {
+    "@koa/cors": "^3.1.0",
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
