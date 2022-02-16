@@ -10,7 +10,7 @@ const approovTokenHeader = 'Approov-Token'.toLowerCase();
 const authenticationHeader = 'Authorization'.toLowerCase();
 
 const verifyToken = (ctx) => {
-  debug('check Approov token');
+  debug('>>> Check Approov token <<<');
 
   const approovToken = ctx.headers[approovTokenHeader];
   debug(`approov-token: ${approovToken}`);
@@ -25,8 +25,8 @@ const verifyToken = (ctx) => {
   return { valid: true, status: 'valid approov token' };
 }
 
-const verifyBoundToken = (ctx) => {
-  debug('check Approov bound token');
+const verifyApproovTokenBinding = (ctx) => {
+  debug('>>> Check Approov Token Binding');
 
   const approovToken = ctx.headers[approovTokenHeader];
   debug(`approov-token: ${approovToken}`);
@@ -63,6 +63,6 @@ const verifyBoundToken = (ctx) => {
   return { valid: true, status: 'valid approov bound token' };
 }
 
-module.exports = { verifyToken, verifyBoundToken };
+module.exports = { verifyToken, verifyApproovTokenBinding };
 
 // end of file

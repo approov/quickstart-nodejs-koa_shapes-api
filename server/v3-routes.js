@@ -1,8 +1,15 @@
-// shapes api server - v2 api key protected routes
-
 const { debug } = require('./utils');
 const Router = require('koa-router');
 const { verifyApiKey } = require('./api-key');
+const { verifyToken, verifyApproovTokenBinding } = require('./auth');
+
+const ENFORCE_APPROOV = (process.env.ENFORCE_APPROOV || 'true') == 'true';
+
+// handle routes
+
+const router = new Router({
+  prefix: '/v3'
+});
 
 const abortOnInvalidApiKey = (ctx) => {
   const { valid, status } = verifyApiKey(ctx);
@@ -15,25 +22,42 @@ const abortOnInvalidApiKey = (ctx) => {
   debug(`api key is valid`);
 }
 
-// handle routes
-
-const router = new Router({
-  prefix: '/v1'
-});
-
 // authorize routes
 
+const abortOnInvalidApproovToken = ({ valid, status }) => {
+  if (!valid) {
+    if (ENFORCE_APPROOV) {
+      debug(`authorization failed: ${status} - error`);
+      ctx.throw(400, status);
+    } else {
+      debug(`authorization failed: ${status} - warning only`);
+    }
+  } else {
+    debug('authorization passed');
+  }
+}
+
 router.use('/shapes', async (ctx, next) => {
+  const result = verifyToken(ctx);
+
+  abortOnInvalidApproovToken(result);
+
   abortOnInvalidApiKey(ctx);
 
   await next();
 });
 
 router.use(['/forms'], async (ctx, next) => {
+  const result = verifyApproovTokenBinding(ctx);
+
+  abortOnInvalidApproovToken(result);
+
   abortOnInvalidApiKey(ctx);
 
   await next();
 });
+
+// handle authorized routes
 
 const hello = 'Hello, World!';
 
@@ -41,7 +65,7 @@ router.get('/hello', async ctx => {
   debug(`text: ${hello}`);
   ctx.body = {
     text: hello,
-    status: `${hello}`
+    status: `${hello} (healthy)`
   };
 });
 
@@ -52,7 +76,7 @@ router.get('/shapes', async ctx => {
   debug(`shape: ${shape}`);
   ctx.body = {
     shape,
-    status: `${shape} (api key protected)`
+    status: `${shape} (api key valid)`
   };
 });
 
@@ -63,10 +87,8 @@ router.get('/forms', async ctx => {
   debug(`form: ${form}`);
   ctx.body = {
     form,
-    status: `${form} (api key protected)`
+    status: `${form} (api key valid)`
   };
 });
 
 module.exports = router;
-
-// end of file

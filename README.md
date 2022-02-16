@@ -27,6 +27,10 @@ PUBLIC_DOMAIN=shapes.approov.io
 
 # Get it with: approov secret -get base64
 APPROOV_SECRET=approov-base64-encoded-secret-here
+
+# To try out this quickstart you can quickly generate an API key with:
+# $ strings /dev/urandom | grep -o '[[:alpha:]]' | head -n 128 | tr -d '\n'; echo
+API_KEY=your_api_key_here
 ```
 
 [TOC](#toc)
@@ -110,16 +114,20 @@ The Shapes API can be tested in Localhost or in a Production staging server with
 To use it you will need to start the server with this `.env` file:
 
 ```bash
-PUBLIC_DOMAIN=shapes.staging.demo.approov.io
+PUBLIC_DOMAIN=your.domain.com
 HTTP_PORT=8002
 ENABLE_LOGGING=true
 
 # Feel free to play with different secrets. For development you can create them with:
 # $ openssl rand -base64 64 | tr -d '\n'; echo
 APPROOV_SECRET=h+CX0tOzdAAR9l15bWAqvq7w9olk66daIH+Xk+IAHhVVHszjDzeGobzNnqyRze3lw/WVyWrc2gZfh3XXfBOmww==
+
+# Dummy API Key for the v3 endpoint was generated with:
+# $ strings /dev/urandom | grep -o '[[:alpha:]]' | head -n 25 | tr -d '\n'; echo
+API_KEY=yXClypapWNHIifHUWmBIyPFAm
 ```
 
-Please adjust `shapes.staging.demo.approov.io` to the domain being used by your server.
+Please adjust `your.domain.com` to the domain being used by your server or just replace with `localhost` when running the Shapes API server from your own machine.
 
 You can use this same Postman collection to test the Production server, but then you need to manually update the `Approov-Token` header for each valid request example in the collection with an example token from the Approov CLI:
 

@@ -19,6 +19,7 @@ const https = require('https');
 const v0Router = require('./v0-routes');
 const v1Router = require('./v1-routes');
 const v2Router = require('./v2-routes');
+const v3Router = require('./v3-routes');
 
 const HTTP_PORT = process.env.HTTP_PORT || 80;
 const HTTPS_PORT = process.env.HTTPS_PORT || 443;
@@ -83,6 +84,11 @@ app.use(v1Router.allowedMethods());
 
 app.use(v2Router.routes());
 app.use(v2Router.allowedMethods());
+
+// handle v3 protected routes
+
+app.use(v3Router.routes());
+app.use(v3Router.allowedMethods());
 
 // start service
 

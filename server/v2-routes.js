@@ -2,7 +2,7 @@
 
 const { debug } = require('./utils');
 const Router = require('koa-router');
-const { verifyToken, verifyBoundToken } = require('./auth');
+const { verifyToken, verifyApproovTokenBinding } = require('./auth');
 
 const ENFORCE_APPROOV = (process.env.ENFORCE_APPROOV || 'true') == 'true';
 
@@ -14,9 +14,7 @@ const router = new Router({
 
 // authorize routes
 
-router.use('/shapes', async (ctx, next) => {
-  const { valid, status } = verifyToken(ctx);
-
+const abortOnInvalidApproovToken = ({ valid, status }) => {
   if (!valid) {
     if (ENFORCE_APPROOV) {
       debug(`authorization failed: ${status} - error`);
@@ -27,23 +25,20 @@ router.use('/shapes', async (ctx, next) => {
   } else {
     debug('authorization passed');
   }
+}
+
+router.use('/shapes', async (ctx, next) => {
+  const result = verifyToken(ctx);
+
+  abortOnInvalidApproovToken(result);
 
   await next();
 });
 
 router.use(['/forms'], async (ctx, next) => {
-  const { valid, status } = verifyBoundToken(ctx);
+  const result = verifyApproovTokenBinding(ctx);
 
-  if (!valid) {
-    if (ENFORCE_APPROOV) {
-      debug(`authorization failed: ${status} - error`);
-      ctx.throw(400, status);
-    } else {
-      debug(`authorization failed: ${status} - warning only`);
-    }
-  } else {
-    debug('authorization passed');
-  }
+  abortOnInvalidApproovToken(result);
 
   await next();
 });
