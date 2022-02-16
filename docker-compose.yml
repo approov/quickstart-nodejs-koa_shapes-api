@@ -3,7 +3,7 @@ version: "2.3"
 services:
 
   node:
-    image: ${DOCKER_IMAGE? Missing value for DOCKER_IMAGE env var!}
+    image: ${DOCKER_IMAGE:-approov2/shapes-node-koa}
     build: .
     restart: always
     env_file:
@@ -16,7 +16,7 @@ services:
       - "traefik.enable=true"
       - "traefik.backend=${PUBLIC_DOMAIN? Missing value for: PUBLIC_DOMAIN}"
       - "traefik.docker.network=traefik"
-      - "traefik.port=${HTTP_PORT? Missing value for: HTTP_PORT}"
+      - "traefik.port=${HTTP_PORT:-8002}"
       - "traefik.frontend.rule=Host:${PUBLIC_DOMAIN}"
 
 networks:

@@ -7,7 +7,7 @@ Show_Help() {
 }
 
 Build_Docker_Image() {
-  sudo docker build -t "${DOCKER_IMAGE}" .
+  sudo docker build -t "${DOCKER_IMAGE:-approov2/shapes-node-koa:dev}" .
 }
 
 Create_Docker_Container() {
@@ -27,7 +27,7 @@ Create_Docker_Container() {
         --publish "127.0.0.1:${_port}:${_port}" \
         --workdir "/home/node/app" \
         --volume "$PWD:/home/node/app" \
-        "${DOCKER_IMAGE}" ${_command}
+        "${DOCKER_IMAGE:-approov2/shapes-node-koa:dev}" ${_command}
 }
 
 Stop_Docker_Container() {
