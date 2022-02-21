@@ -14,7 +14,7 @@ const router = new Router({
 
 // authorize routes
 
-const abortOnInvalidApproovToken = ({ valid, status }) => {
+const abortOnInvalidApproovToken = (ctx, { valid, status }) => {
   if (!valid) {
     if (ENFORCE_APPROOV) {
       debug(`authorization failed: ${status} - error`);
@@ -30,7 +30,7 @@ const abortOnInvalidApproovToken = ({ valid, status }) => {
 router.use('/shapes', async (ctx, next) => {
   const result = verifyToken(ctx);
 
-  abortOnInvalidApproovToken(result);
+  abortOnInvalidApproovToken(ctx, result);
 
   await next();
 });
@@ -38,7 +38,7 @@ router.use('/shapes', async (ctx, next) => {
 router.use(['/forms'], async (ctx, next) => {
   const result = verifyApproovTokenBinding(ctx);
 
-  abortOnInvalidApproovToken(result);
+  abortOnInvalidApproovToken(ctx, result);
 
   await next();
 });
