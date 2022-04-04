@@ -76,7 +76,7 @@ router.get('/shapes', async ctx => {
   debug(`shape: ${shape}`);
   ctx.body = {
     shape,
-    status: `${shape} (api key valid)`
+    status: `${shape} (approoved and api key valid)`
   };
 });
 
@@ -87,7 +87,7 @@ router.get('/forms', async ctx => {
   debug(`form: ${form}`);
   ctx.body = {
     form,
-    status: `${form} (api key valid)`
+    status: `${form} (approoved and api key valid)`
   };
 });
 
