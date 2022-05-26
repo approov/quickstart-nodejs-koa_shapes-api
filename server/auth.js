@@ -9,7 +9,7 @@ const APPROOV_SECRET=Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'Approov-Token'.toLowerCase();
 const authenticationHeader = 'Authorization'.toLowerCase();
 
-const verifyToken = (ctx) => {
+const verifyToken = (ctx, payClaimData) => {
   debug('>>> Check Approov token <<<');
 
   const approovToken = ctx.headers[approovTokenHeader];
@@ -22,30 +22,29 @@ const verifyToken = (ctx) => {
   } catch(err) {
     return { valid: false, status: 'invalid approov token' };
   }
-  return { valid: true, status: 'valid approov token' };
+
+  // If the payClaimData is truthy, then check the pay claim of the token
+  // against the hash of the payClaimData
+  if (payClaimData) {
+    debug('>>> Check Approov token binding <<<');
+    const payClaimValue = result.payload['pay'];
+    if (!payClaimValue) {
+      debug('missing pay claim in Approov; binding comparison ignored');
+      return { valid: false, status: 'approov token has no pay claim' };
+    }
+
+    const payClaimDataHash = crypto.createHash('sha256').update(payClaimData).digest('base64');
+    if (payClaimValue !== payClaimDataHash) {
+      debug(`approov-pay-claim mismatch: claim ${payClaimValue} != data hash ${payClaimDataHash}`);
+      return { valid: false, status: 'approov token pay claim mismatch' };
+    }
+  }
+  return { valid: true, status: 'valid approov token', payload: payload };
 }
 
-const verifyApproovTokenBinding = (ctx) => {
-  debug('>>> Check Approov Token Binding');
+const verifyApproovAuthTokenBinding = (ctx) => {
+  debug('>>> Check Approov Auth Token Binding');
 
-  const approovToken = ctx.headers[approovTokenHeader];
-  debug(`approov-token: ${approovToken}`);
-  if (!approovToken) {
-    return { valid: false, status: 'missing approov token' };
-  }
-  try {
-    var payload = jwt.verify(approovToken, APPROOV_SECRET, {algorithms: ['HS256']});
-  } catch(err) {
-    return { valid: false, status: 'invalid approov token' };
-  }
-
-  const payClaim = payload['pay'];
-  if (!payClaim) {
-    debug('missing pay claim in Approov; binding comparison ignored');
-    return { valid: true, status: 'valid approov token' };
-  }
-
-  debug(`approov-claim: claim ${payClaim}`);
   const authString = ctx.headers[authenticationHeader];
   if (!authString) {
     return { valid: false, status: 'missing bearer authentication' };
@@ -56,13 +55,9 @@ const verifyApproovTokenBinding = (ctx) => {
   }
   const authData = split[1];
 
-  const authHash = crypto.createHash('sha256').update(authData).digest('base64');
-  if (payClaim !== authHash) {
-    return { valid: false, status: 'invalid approov bound token' };
-  }
-  return { valid: true, status: 'valid approov bound token' };
+  return verifyToken(ctx, authData);
 }
 
-module.exports = { verifyToken, verifyApproovTokenBinding };
+module.exports = { verifyToken, verifyApproovAuthTokenBinding };
 
 // end of file

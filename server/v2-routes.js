@@ -2,7 +2,7 @@
 
 const { debug } = require('./utils');
 const Router = require('koa-router');
-const { verifyToken, verifyApproovTokenBinding } = require('./auth');
+const { verifyToken, verifyApproovAuthTokenBinding } = require('./auth');
 
 const ENFORCE_APPROOV = (process.env.ENFORCE_APPROOV || 'true') == 'true';
 
@@ -36,7 +36,7 @@ router.use('/shapes', async (ctx, next) => {
 });
 
 router.use(['/forms'], async (ctx, next) => {
-  const result = verifyApproovTokenBinding(ctx);
+  const result = verifyApproovAuthTokenBinding(ctx);
 
   abortOnInvalidApproovToken(ctx, result);
 
