@@ -3,7 +3,6 @@
 const { debug } = require('./utils');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
 
 const APPROOV_SECRET=Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'Approov-Token'.toLowerCase();
