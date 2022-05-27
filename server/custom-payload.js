@@ -7,67 +7,92 @@ const { debug } = require('./utils');
 const payloadHeader = 'Pay-Content'.toLowerCase();
 const responseHeader = 'Pay-Response';
 
-const getUtf8B64url = (ctx, headerName) => {
-  const b64urlData = ctx.headers[headerName];
-  if (!b64urlData) {
-    return { valid: false, status: `no data in header: ${headerName}` };
-  }
-
+const decodeB64urlUtf8 = (b64urlDataString) => {
   // old form - will need require above
-  //base64url.decode(b64urlData);
+  //base64url.decode(b64urlDataString);
   try {
-    const dataBuf = Buffer.from(b64urlData, 'base64url');
-    return { valid: true, status: `decoded base64url from header: ${headerName}`, data: dataBuf.toString() };
+    const dataBuf = Buffer.from(b64urlDataString, 'base64url');
+    const dataString = dataBuf.toString();
+    debug(`succeeded base64url decode: ${dataString}`)
+    return { valid: true, status: 'decoded base64url data', data: dataString };
   } catch (error) {
-    debug(`failed base64url decode: ${headerName} -> ${b64urlData}`)
-    return { valid: false, status: `failed base64url decode: ${headerName} - ${error}` };
+    debug(`failed base64url decode: ${b64urlDataString}: ${error}`)
+    return { valid: false, status: `failed base64url decode` };
   }
 }
 
-const getJSONDecodeUtf8B64url = (ctx, headerName) => {
-  const headerResult = getUtf8B64url(ctx, headerName);
-  if (!headerResult.valid) {
-    return headerResult;
+const encodeB64urlUtf8 = (dataString) => {
+  const dataBuff = Buffer.from(dataString);
+  const b64urlDataString = buff.toString('base64url');
+  debug(`succeeded base64url encode: ${dataString} -> ${b64urlDataString}`)
+  return { valid: true, status: `succeeded base64url encode`, data: b64urlDataString };
+  // old form - will need require above and be *something like*
+  //base64url.encode(b64urlDataString);
+}
+
+const decodeJsonB64urlUtf8 = (b64urlDataString) => {
+  const decodeResult = decodeB64urlUtf8(b64urlDataString);
+  if (!decodeResult.valid) {
+    return decodeResult;
   }
   try {
-    const jsonData = headerResult.data
-    const decodedData = JSON.parse(jsonData);
-    return { valid: true, status: `decoded JSON from header: ${headerName}`, data: decodedData, jsonData: jsonData};
+    const jsonDataString = decodeResult.data
+    const decodedData = JSON.parse(jsonDataString);
+    debug(`succeeded JSON decode`)
+    return { valid: true, status: `decoded JSON data`, data: decodedData, jsonData: jsonDataString};
   } catch (error) {
-    debug(`failed JSON decode: ${headerName} -> ${jsonData}`)
-    return { valid: false, status: `failed JSON decode: ${headerName} - ${error}` };
+    debug(`failed JSON decode`)
+    return { valid: false, status: `failed JSON decode` };
   }
 }
 
-const getObjectFromListOfListsHeader = (ctx, headerName) => {
-  const decodedResult = getJSONDecodeUtf8B64url(ctx, headerName);
+const encodeJsonB64urlUtf8 = (data) => {
+  const jsonDataString = JSON.stringify(data)
+  return encodeB64urlUtf8(jsonDataString)
+}
+
+const decodeObjectFromListOfListsJsonUtf8B64url = (b64urlDataString) => {
+  const decodedResult = decodeJsonB64urlUtf8(b64urlDataString);
   if (!decodedResult.valid) {
     return decodedResult;
   }
 
   const decodedData = decodedResult.data
   if (typeof decodedData !== 'object' || !decodedData.length) {
-    debug(`failed outer List conversion, empty list: ${headerName} -> ${decodedResult.jsonData}`)
-    return { valid: false, status: `failed outer List conversion: ${headerName}` };
+    debug('failed outer list conversion, empty list')
+    return { valid: false, status: `failed outer list conversion, empty list` };
   }
 
   const keys = [];
   const resultData = {};
   for (const [key, val] of decodedData) {
-    if (!typeof key === 'string' || !typeof val === 'string' || key === "" ) {
-      debug(`failed inner List conversion, after ${keys.length} elements: ${headerName} -> ${decodedResult.jsonData}`)
-      return { valid: false, status: `failed inner List conversion, key/value check: ${headerName}` };
+    if (!typeof key === 'string' || !typeof val === 'string' || key === '' ) {
+      debug(`failed inner list conversion after ${keys.length} elements: key/value check`)
+      return { valid: false, status: `failed inner list conversion: key/value check` };
     }
     if (resultData.hasOwnProperty(key)) {
-      debug(`inner List conversion found duplicate property, after ${keys.length} elements: ${headerName} -> ${decodedResult.jsonData}`)
-      return { valid: false, status: `failed inner List conversion, duplicate property: ${headerName}` };
+      debug(`failed inner list conversion after ${keys.length} elements: duplicate property ${key}`)
+      return { valid: false, status: 'failed inner list conversion: duplicate property' };
     }
     keys.push(key);
     resultData[key] = val;
   }
-  return { valid: true, status: `decoded special object from header: ${headerName}`, data: resultData, keys: keys, jsonData: decodedResult.jsonData };
+  return { valid: true, status: `succeeded list of lists conversion`, data: resultData, keys: keys, jsonData: decodedResult.jsonData };
 }
 
-module.exports = { getObjectFromListOfListsHeader };
+const encodeListOfListsJsonUtf8B64urlFromObject = (data, keys) => {
+  const headerList = [];
+  for (const key of keys) {
+    if (data.hasOwnProperty(key)) {
+      const value = data[key];
+      if (typeof value === 'string' && value !== '') {
+        headerList.push([key, value]);
+      }
+    }
+  }
+  return encodeJsonB64urlUtf8(headerList)
+}
+
+module.exports = { decodeObjectFromListOfListsJsonUtf8B64url, encodeListOfListsJsonUtf8B64urlFromObject };
 
 // end of file

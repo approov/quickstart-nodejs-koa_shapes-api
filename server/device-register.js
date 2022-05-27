@@ -15,17 +15,18 @@ const deviceQueue = {
       deviceQueue.end.next = newEnd;
     }
     deviceQueue.end = newEnd;
+    debug(`deviceQueue.push: ${deviceID}`);
   },
   pop: () => {
     if (deviceQueue.begin === null) {
       return false;
     }
     let deviceID = deviceQueue.begin.deviceID;
-    debug(`deviceQueue.pop: ${deviceID}`);
     deviceQueue.begin = deviceQueue.begin.next
     if (deviceQueue.begin === null) {
       deviceQueue.end = null;
     }
+    debug(`deviceQueue.pop: ${deviceID}`);
     return deviceID;
   }
 };

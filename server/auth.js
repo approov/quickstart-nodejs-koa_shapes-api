@@ -38,7 +38,7 @@ const verifyToken = (ctx, payClaimData) => {
       return { valid: false, status: 'approov token pay claim mismatch' };
     }
   }
-  return { valid: true, status: 'valid approov token', payload: payload };
+  return { valid: true, status: 'valid approov token', token: approovToken, payload: payload };
 }
 
 const verifyApproovAuthTokenBinding = (ctx) => {
