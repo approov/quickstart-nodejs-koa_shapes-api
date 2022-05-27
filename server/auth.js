@@ -3,6 +3,8 @@
 const { debug } = require('./utils');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const { registerDeviceWithValue, getDeviceValue, resetDeviceValue } = require('./device-register');
+const { decodePayload, encodePayload } = require('./custom-payload')
 
 const APPROOV_SECRET=Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
 const approovTokenHeader = 'Approov-Token'.toLowerCase();
@@ -17,7 +19,7 @@ const verifyToken = (ctx, payClaimData) => {
     return { valid: false, status: 'missing approov token' };
   }
   try {
-    var payload = jwt.verify(approovToken, APPROOV_SECRET, {algorithms: ['HS256']});
+    var claims = jwt.verify(approovToken, APPROOV_SECRET, {algorithms: ['HS256']});
   } catch(err) {
     return { valid: false, status: 'invalid approov token' };
   }
@@ -26,7 +28,7 @@ const verifyToken = (ctx, payClaimData) => {
   // against the hash of the payClaimData
   if (payClaimData) {
     debug('>>> Check Approov token binding <<<');
-    const payClaimValue = result.payload['pay'];
+    const payClaimValue = result.claims['pay'];
     if (!payClaimValue) {
       debug('missing pay claim in Approov; binding comparison ignored');
       return { valid: false, status: 'approov token has no pay claim' };
@@ -38,7 +40,7 @@ const verifyToken = (ctx, payClaimData) => {
       return { valid: false, status: 'approov token pay claim mismatch' };
     }
   }
-  return { valid: true, status: 'valid approov token', token: approovToken, payload: payload };
+  return { valid: true, status: 'valid approov token', token: approovToken, claims: claims };
 }
 
 const verifyApproovAuthTokenBinding = (ctx) => {
@@ -55,6 +57,56 @@ const verifyApproovAuthTokenBinding = (ctx) => {
   const authData = split[1];
 
   return verifyToken(ctx, authData);
+}
+
+
+const CUSTOM_PAYLOAD_HEADER = 'Pay-Content'.toLowerCase();
+const CUSTOM_PAYLOAD_RESPONSE_HEADER = 'Pay-Response'.toLowerCase();;
+
+const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
+  var payloadResult, tokenResult;
+  // read the payload if one is present
+  const b64urlData = ctx.headers[CUSTOM_PAYLOAD_HEADER];
+  if (b64urlData) {
+    // decode payload
+    var payloadResult = decodePayload(b64urlData);
+    // return { valid: true, status: `succeeded list of lists conversion`, data: resultData, keys: keys, jsonData: decodedResult.jsonData };
+    if (!payloadResult.valid) {
+      return { valid: false, status: 'invalid data in payload header' };
+    }
+    tokenResult = verifyToken(ctx, payloadResult.jsonData)
+    // return { valid: true, status: 'valid approov token', token: approovToken, claims: claims };
+  } else {
+    tokenResult = verifyToken(ctx)
+  }
+  // check for a valid token
+  if (!tokenResult.valid) {
+    return tokenResult;
+  }
+  // check for register new device flag and set it up with at least the current token
+  if (registerNewDevice) {
+    registerDeviceWithValue(tokenResult.claims.did, {pass: true, token: tokenResult.token})
+  }
+  // Retrieve the registered device properties
+  const deviceResult = getDeviceValue(tokenResult.claims.did);
+  if (!deviceResult) {
+    return { valid: false, status: 'device not registered' };
+  }
+
+  // now check the rest of the payload properties if they are present
+  if (payloadResult) {
+    processPayloadResults(payloadResult.keys, payloadResult.data, deviceResult)
+  } else {
+    // no payload result, just check that the device is registered with a passing result
+    if (!deviceResult.pass) {
+      return { valid: false, status: 'device failed last attestation' };
+    }if (deviceResult.token !== tokenResult['token']) {
+      return { valid: false, status: 'device token incorrect' };
+    }
+  }
+
+  return 
+
 }
 
 module.exports = { verifyToken, verifyApproovAuthTokenBinding };

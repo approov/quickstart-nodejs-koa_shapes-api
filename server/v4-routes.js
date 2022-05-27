@@ -1,15 +1,11 @@
 const { debug } = require('./utils');
 const Router = require('koa-router');
 const { verifyApiKey } = require('./api-key');
-const { verifyToken, verifyApproovAuthTokenBinding } = require('./device-register');
+const { verifyToken, verifyApproovAuthTokenBinding } = require('./auth');
 
 const ENFORCE_APPROOV = (process.env.ENFORCE_APPROOV || 'true') == 'true';
 
-// handle routes
-
-const router = new Router({
-  prefix: '/v4'
-});
+// approov token checks and custom payload handling
 
 const abortOnInvalidApiKey = (ctx) => {
   const { valid, status } = verifyApiKey(ctx);
@@ -21,8 +17,6 @@ const abortOnInvalidApiKey = (ctx) => {
 
   debug(`api key is valid`);
 }
-
-// authorize routes
 
 const abortOnInvalidApproovToken = (ctx, { valid, status }) => {
   if (!valid) {
@@ -37,7 +31,18 @@ const abortOnInvalidApproovToken = (ctx, { valid, status }) => {
   }
 }
 
+// handle routes
+
+const router = new Router({
+  prefix: '/v4'
+});
+
+
+// authorize routes
+
 router.use('/shapes', async (ctx, next) => {
+  const payload = readPayloadHeader(ctx);
+
   const result = verifyToken(ctx);
 
   abortOnInvalidApproovToken(ctx, result);
@@ -58,6 +63,12 @@ router.use(['/forms'], async (ctx, next) => {
 });
 
 // handle authorized routes
+
+router.post('/register', async ctx => {
+  // grab any custom-payload data
+
+  const 
+});
 
 const hello = 'Hello, World!';
 

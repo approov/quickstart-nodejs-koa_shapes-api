@@ -4,9 +4,6 @@ const { debug } = require('./utils');
 //const base64url = require('base64url');
 
 
-const payloadHeader = 'Pay-Content'.toLowerCase();
-const responseHeader = 'Pay-Response';
-
 const decodeB64urlUtf8 = (b64urlDataString) => {
   // old form - will need require above
   //base64url.decode(b64urlDataString);
