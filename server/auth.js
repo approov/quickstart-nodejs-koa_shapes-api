@@ -59,10 +59,26 @@ const verifyApproovAuthTokenBinding = (ctx) => {
   return verifyToken(ctx, authData);
 }
 
+const processPayloadResults = (keys, data, lastDeviceResult) => {
+  const deviceResult = {pass: true};
+  const responseData = {id:data.id};
+  for (const [idx, checker] of [].entries()) {
+    if (!checker(data, responseData)) {
+      debug('checker@${idx} caused failure');
+      deviceResult.pass = false;
+    }
+  }
+  const encodedResponseResult = encodePayload(responseData, keys);
+  if (!encodedResponseResult.valid) {
+    debug('failed response payload encoding: ' + encodedResponseResult.status);
+    deviceResult.pass = false;
+    return [ deviceResult, '' ];  
+  }
+
+  return [ deviceResult, encodedResponseResult.data ];
+}
 
 const CUSTOM_PAYLOAD_HEADER = 'Pay-Content'.toLowerCase();
-const CUSTOM_PAYLOAD_RESPONSE_HEADER = 'Pay-Response'.toLowerCase();;
-
 const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
   var payloadResult, tokenResult;
   // read the payload if one is present
@@ -72,7 +88,7 @@ const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
     var payloadResult = decodePayload(b64urlData);
     // return { valid: true, status: `succeeded list of lists conversion`, data: resultData, keys: keys, jsonData: decodedResult.jsonData };
     if (!payloadResult.valid) {
-      return { valid: false, status: 'invalid data in payload header' };
+      return { valid: false, status: 'device fail; invalid data in payload header' };
     }
     tokenResult = verifyToken(ctx, payloadResult.jsonData)
     // return { valid: true, status: 'valid approov token', token: approovToken, claims: claims };
@@ -90,25 +106,35 @@ const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
   // Retrieve the registered device properties
   const deviceResult = getDeviceValue(tokenResult.claims.did);
   if (!deviceResult) {
-    return { valid: false, status: 'device not registered' };
+    return { valid: false, status: 'device fail; not registered' };
   }
 
   // now check the rest of the payload properties if they are present
   if (payloadResult) {
-    processPayloadResults(payloadResult.keys, payloadResult.data, deviceResult)
-  } else {
-    // no payload result, just check that the device is registered with a passing result
-    if (!deviceResult.pass) {
-      return { valid: false, status: 'device failed last attestation' };
-    }if (deviceResult.token !== tokenResult['token']) {
-      return { valid: false, status: 'device token incorrect' };
+    const [newDeviceResult, payloadResponse] = processPayloadResults(payloadResult.keys, payloadResult.data, deviceResult)
+    // add the raw token to the result for future matching
+    newDeviceResult.token = tokenResult.token;
+    resetDeviceValue(tokenResult.claims.did, newDeviceResult);
+    const result = {response: payloadResponse};
+    if (newDeviceResult.pass) {
+      result.valid = true;
+      result.status = 'device pass; updated payload properties';
+    } else {
+      result.valid = false;
+      result.status = 'device fail; updated token';
     }
+    return result;
   }
-
-  return 
-
+  // no payload result, just check that the device is registered with a passing result
+  if (!deviceResult.pass) {
+    return { valid: false, status: 'device fail; cached payload check fail' };
+  }
+  if (deviceResult.token !== tokenResult['token']) {
+    return { valid: false, status: 'device fail; unknown token' };
+  }
+  return {valid: true, status: 'device pass; matching token'};
 }
 
-module.exports = { verifyToken, verifyApproovAuthTokenBinding };
+module.exports = { verifyToken, verifyApproovAuthTokenBinding, verifyCustomPayloadWithToken };
 
 // end of file
