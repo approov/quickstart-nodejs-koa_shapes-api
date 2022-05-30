@@ -7,7 +7,7 @@ Show_Help() {
 }
 
 Build_Docker_Image() {
-  sudo docker build -t "${DOCKER_IMAGE:-approov2/shapes-node-koa:dev}" .
+  sudo docker build --network host -t "${DOCKER_IMAGE:-approov2/shapes-node-koa:dev}" .
 }
 
 Create_Docker_Container() {

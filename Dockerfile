@@ -1,4 +1,4 @@
-FROM node:11
+FROM node:18
 
 ARG DOCKER_BUILD_SCRIPTS_RELEASE=dev-wip
 
@@ -20,27 +20,20 @@ RUN \
     ca-certificates \
     unzip \
     curl && \
-
-mkdir -p "${DOCKER_BUILD}" && \
-
-curl \
-  -fsSl \
-  -o archive.tar.gz \
-  https://gitlab.com/exadra37-bash/docker/bash-scripts-for-docker-builds/-/archive/"${DOCKER_BUILD_SCRIPTS_RELEASE}"/bash-scripts-for-docker-builds-dev.tar.gz?path=scripts && \
-
-tar xf archive.tar.gz -C "${DOCKER_BUILD}" --strip 1 && \
-
-rm -vf archive.tar.gz && \
-
-"${DOCKER_BUILD}"/scripts/custom-ssl/operating-system/add-custom-authority-certificate.sh \
-  "/.certificates/ProxyCA.crt" \
-  /usr/local/share/ca-certificates && \
-
-"${DOCKER_BUILD}"/scripts/custom-ssl/nodejs/add-certificate-to-server.sh \
-  "/etc/ssl/certs/ProxyCA.pem" \
-  "/home/node" && \
-
-npm install pm2 -g
+  mkdir -p "${DOCKER_BUILD}" && \
+  curl \
+    -fsSl \
+    -o archive.tar.gz \
+    https://gitlab.com/exadra37-bash/docker/bash-scripts-for-docker-builds/-/archive/"${DOCKER_BUILD_SCRIPTS_RELEASE}"/bash-scripts-for-docker-builds-dev.tar.gz?path=scripts && \
+  tar xf archive.tar.gz -C "${DOCKER_BUILD}" --strip 1 && \
+  rm -vf archive.tar.gz && \
+  "${DOCKER_BUILD}"/scripts/custom-ssl/operating-system/add-custom-authority-certificate.sh \
+    "/.certificates/ProxyCA.crt" \
+    /usr/local/share/ca-certificates && \
+  "${DOCKER_BUILD}"/scripts/custom-ssl/nodejs/add-certificate-to-server.sh \
+    "/etc/ssl/certs/ProxyCA.pem" \
+    "/home/node" && \
+  npm install pm2 -g
 
 # We should never run containers as root, just like we do not run as root in our PCs and production servers.
 USER node
@@ -56,8 +49,7 @@ COPY --chown=node:node ./server ./server
 COPY --chown=node:node ./package.json ./package.json
 COPY --chown=node:node ./package-lock.json ./package-lock.json
 
-RUN \
-  npm install && \
+RUN npm install && \
   npm audit fix
 
 # Start the app
