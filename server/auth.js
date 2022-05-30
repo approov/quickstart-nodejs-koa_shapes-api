@@ -79,6 +79,7 @@ const processPayloadResults = (keys, data, lastDeviceResult) => {
 }
 
 const CUSTOM_PAYLOAD_HEADER = 'Pay-Content'.toLowerCase();
+const CUSTOM_PAYLOAD_RESPONSE_HEADER = 'Pay-Response'.toLowerCase();
 const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
   var payloadResult, tokenResult;
   // read the payload if one is present
@@ -86,7 +87,7 @@ const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
   if (b64urlData) {
     // decode payload
     var payloadResult = decodePayload(b64urlData);
-    // return { valid: true, status: `succeeded list of lists conversion`, data: resultData, keys: keys, jsonData: decodedResult.jsonData };
+    // { valid: true|false, status: <msg>, data: resultData, keys: keys, jsonData: decodedResult.jsonData };
     if (!payloadResult.valid) {
       return { valid: false, status: 'device fail; invalid data in payload header' };
     }
@@ -115,6 +116,9 @@ const verifyCustomPayloadWithToken = (ctx, registerNewDevice) => {
     // add the raw token to the result for future matching
     newDeviceResult.token = tokenResult.token;
     resetDeviceValue(tokenResult.claims.did, newDeviceResult);
+    // add the response header to the generated value whether or not the
+    // payload result check was successful
+    ctx.set(CUSTOM_PAYLOAD_RESPONSE_HEADER, payloadResponse)
     const result = {response: payloadResponse};
     if (newDeviceResult.pass) {
       result.valid = true;

@@ -41,23 +41,11 @@ const router = new Router({
   prefix: '/v4'
 });
 
-
 // authorize routes
 
 router.use('/shapes', async (ctx, next) => {
-  const payload = readPayloadHeader(ctx);
-
-  const result = verifyToken(ctx);
-
-  abortOnInvalidApproovToken(ctx, result);
-
-  abortOnInvalidApiKey(ctx);
-
-  await next();
-});
-
-router.use(['/forms'], async (ctx, next) => {
-  const result = verifyApproovAuthTokenBinding(ctx);
+  // custom payload approov token check (no device registration)
+  const result = verifyCustomPayloadWithToken(ctx, false);
 
   abortOnInvalidApproovToken(ctx, result);
 
@@ -71,7 +59,9 @@ router.use(['/forms'], async (ctx, next) => {
 router.post('/register', async ctx => {
   // process the approov token as usual but also register the device if it's valid
   const result = verifyCustomPayloadWithToken(ctx, true);
+
   abortOnInvalidApproovToken(ctx, result);
+
   debug(`register: success`);
   ctx.body = {
     status: 'success'
@@ -96,17 +86,6 @@ router.get('/shapes', async ctx => {
   ctx.body = {
     shape,
     status: `${shape} (approoved and api key valid)`
-  };
-});
-
-const forms = [ 'Box', 'Cone', 'Cube', 'Sphere' ];
-
-router.get('/forms', async ctx => {
-  const form = forms[Math.floor((Math.random() * forms.length))];
-  debug(`form: ${form}`);
-  ctx.body = {
-    form,
-    status: `${form} (approoved and api key valid)`
   };
 });
 
