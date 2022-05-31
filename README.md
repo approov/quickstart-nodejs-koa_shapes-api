@@ -11,20 +11,15 @@ Approov 2 shapes server using node.js with koa.
 
 ## TRAEFIK PRODUCTION DEPLOYMENT
 
+We will use a bash script to deploy, via ssh, the Shapes server in a docker container, that is then served by Traefik.
+
+The following instructions will assume that you are at the root of this repo on your computer.
+
 ### Configure the Environment
 
 Create a `.env` file in the root of this project:
 
 ```bash
-# Used to start the NodeJS Koa server and to tell Traefik what port to use to
-# reach the server in the docker network for Traefik, thus this port it's
-# internal and never exposed to the host machine or the internet.
-HTTP_PORT=8002
-
-# The domain that Traefik will be listening for https requests on port 443. All
-# http requests to port 80 will be automatically redirected to https port 443.
-PUBLIC_DOMAIN=shapes.approov.io
-
 # Get it with: approov secret -get base64
 APPROOV_SECRET=approov-base64-encoded-secret-here
 
@@ -35,17 +30,46 @@ API_KEY=your_api_key_here
 
 [TOC](#toc)
 
-### Start the Server
+### Deploy the Shapes API to the Remote Server
 
-Start it with docker compose:
+See your options to deploy:
 
+```console
+./deploy --help
 ```
-docker-compose up -d
+
+Deploy to development:
+
+```console
+./deploy --env dev --from-current
 ```
+
+Find your server at https://dev.shapes.demo.approov.io
+
+Deploy to staging:
+
+```console
+./deploy --env staging --from branch-name-here
+```
+
+Find your server at https://staging.shapes.demo.approov.io
+
+Deploy to production:
+
+```console
+./deploy --env prod --from master
+```
+
+Find your server at https://shapes.approov.io
 
 Traefik will detect the container and create on the fly a new certificate for the domain we specified in `PUBLIC_DOMAIN`, and when the time arrives, will be in charge of renewing it with the same public key.
 
 [TOC](#toc)
+
+
+## Remote Server
+
+Located at `shapes.demo.approov.io`.
 
 ### Tail the Server Logs
 
