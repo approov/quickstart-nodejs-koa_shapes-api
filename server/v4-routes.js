@@ -62,6 +62,8 @@ router.post('/register', async ctx => {
 
   abortOnInvalidApproovToken(ctx, result);
 
+  abortOnInvalidApiKey(ctx);
+
   debug(`register: success`);
   ctx.body = {
     status: 'success'
