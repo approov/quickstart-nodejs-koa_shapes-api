@@ -57,12 +57,13 @@ router.use('/shapes', async (ctx, next) => {
 // handle authorized routes
 
 router.post('/register', async ctx => {
+
+  abortOnInvalidApiKey(ctx);
+
   // process the approov token as usual but also register the device if it's valid
   const result = verifyCustomPayloadWithToken(ctx, true);
 
   abortOnInvalidApproovToken(ctx, result);
-
-  abortOnInvalidApiKey(ctx);
 
   debug(`register: success`);
   ctx.body = {
