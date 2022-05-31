@@ -3,10 +3,14 @@
 const env = require('dotenv');
 
 // ORDER OF THE ENV FILES MATTERS
-env.config({path: '.env.default'});
-env.config({path: '.env'})
+console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
+env.config({path: '.env', debug: true})
+console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
+env.config({path: '.env.default', debug: true});
+console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
 
 const { debug } = require('./utils');
+
 const Koa = require('koa');
 const cors = require('@koa/cors');
 const Router = require('koa-router');
