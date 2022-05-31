@@ -4,9 +4,11 @@ const { debug } = require('./utils');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { registerDeviceWithValue, getDeviceValue, resetDeviceValue } = require('./device-register');
-const { decodePayload, encodePayload } = require('./custom-payload')
+const { decodeObjectFromListOfListsJsonUtf8B64url: decodePayload, encodeListOfListsJsonUtf8B64urlFromObject: encodePayload } = require('./custom-payload')
 
 const APPROOV_SECRET=Buffer.from(process.env.APPROOV_SECRET || '', 'base64');
+const ALLOW_DEBUG_TOKENS = process.env.ALLOW_DEBUG_TOKENS === 'true';
+
 const approovTokenHeader = 'Approov-Token'.toLowerCase();
 const authenticationHeader = 'Authorization'.toLowerCase();
 
@@ -14,21 +16,33 @@ const verifyToken = (ctx, payClaimData) => {
   debug('>>> Check Approov token <<<');
 
   const approovToken = ctx.headers[approovTokenHeader];
-  debug(`approov-token: ${approovToken}`);
   if (!approovToken) {
     return { valid: false, status: 'missing approov token' };
   }
-  try {
-    var claims = jwt.verify(approovToken, APPROOV_SECRET, {algorithms: ['HS256']});
-  } catch(err) {
-    return { valid: false, status: 'invalid approov token' };
+  debug(`approov-token: ${approovToken}`);
+  debug(`ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS} - ${ALLOW_DEBUG_TOKENS}`)
+  let claims = null;
+  if (ALLOW_DEBUG_TOKENS && approovToken.startsWith('{')) {
+    // permit dummy approov token which is just the JSON claims string
+    try {
+      claims = JSON.parse(approovToken);
+      debug(`succeeded dummy approov token JSON decode: ${approovToken}`)
+    } catch (error) {
+      debug(`failed dummy approov token JSON decode: ${approovToken}, ${error}`);
+      return { valid: false, status: 'failed dummy approov token JSON decode' };
+    }
+  } else {
+    try {
+      claims = jwt.verify(approovToken, APPROOV_SECRET, {algorithms: ['HS256']});
+    } catch(err) {
+      return { valid: false, status: 'invalid approov token' };
+    }
   }
-
   // If the payClaimData is truthy, then check the pay claim of the token
   // against the hash of the payClaimData
   if (payClaimData) {
     debug('>>> Check Approov token binding <<<');
-    const payClaimValue = result.claims['pay'];
+    const payClaimValue = claims['pay'];
     if (!payClaimValue) {
       debug('missing pay claim in Approov; binding comparison ignored');
       return { valid: false, status: 'approov token has no pay claim' };

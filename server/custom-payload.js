@@ -20,7 +20,7 @@ const decodeB64urlUtf8 = (b64urlDataString) => {
 
 const encodeB64urlUtf8 = (dataString) => {
   const dataBuff = Buffer.from(dataString);
-  const b64urlDataString = buff.toString('base64url');
+  const b64urlDataString = dataBuff.toString('base64url');
   debug(`succeeded base64url encode: ${dataString} -> ${b64urlDataString}`)
   return { valid: true, status: `succeeded base64url encode`, data: b64urlDataString };
   // old form - will need require above and be *something like*

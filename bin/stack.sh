@@ -58,38 +58,37 @@ Main() {
         exit 1
     fi
 
-    for input in "${@}"
-        do
-            case "${input}" in
-                build)
-                    Build_Docker_Image
-                    exit 0
-                    ;;
-                -p | --port)
-                    HTTP_PORT="${2? Missing HTTP port to access the container in localhost}"
-                    shift 2
-                    ;;
-                -u | --user)
-                    CONTAINER_USER="${2? Missing user name or uid to use inside the container}"
-                    shift 2
-                    ;;
-                up)
-                    Create_Docker_Container "npm start" "${CONTAINER_USER}" "${HTTP_PORT}"
-                    exit 0
-                    ;;
-                stop)
-                    Stop_Docker_Container "${CONTAINER_USER}" "${HTTP_PORT}"
-                    exit 0
-                    ;;
-                shell)
-                    Create_Docker_Container "${2:-bash}" "${CONTAINER_USER}" "${HTTP_PORT}"
-                    exit 0
-                    ;;
-                -h | --help)
-                    Show_Help
-                    exit 0
-                    ;;
-            esac
+    for input in "${@}"; do
+        case "${input}" in
+            build)
+                Build_Docker_Image
+                exit 0
+                ;;
+            -p | --port)
+                HTTP_PORT="${2? Missing HTTP port to access the container in localhost}"
+                shift 2
+                ;;
+            -u | --user)
+                CONTAINER_USER="${2? Missing user name or uid to use inside the container}"
+                shift 2
+                ;;
+            up)
+                Create_Docker_Container "npm start" "${CONTAINER_USER}" "${HTTP_PORT}"
+                exit 0
+                ;;
+            stop)
+                Stop_Docker_Container "${CONTAINER_USER}" "${HTTP_PORT}"
+                exit 0
+                ;;
+            shell)
+                Create_Docker_Container "${2:-bash}" "${CONTAINER_USER}" "${HTTP_PORT}"
+                exit 0
+                ;;
+            -h | --help)
+                Show_Help
+                exit 0
+                ;;
+        esac
     done
 
     Show_Help
