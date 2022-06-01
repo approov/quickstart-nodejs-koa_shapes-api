@@ -27,10 +27,10 @@ RUN \
     https://gitlab.com/exadra37-bash/docker/bash-scripts-for-docker-builds/-/archive/"${DOCKER_BUILD_SCRIPTS_RELEASE}"/bash-scripts-for-docker-builds-dev.tar.gz?path=scripts && \
   tar xf archive.tar.gz -C "${DOCKER_BUILD}" --strip 1 && \
   rm -vf archive.tar.gz && \
-  "${DOCKER_BUILD}"/scripts/custom-ssl/operating-system/add-custom-authority-certificate.sh \
+  "${DOCKER_BUILD}/scripts/custom-ssl/operating-system/add-custom-authority-certificate.sh" \
     "/.certificates/ProxyCA.crt" \
-    /usr/local/share/ca-certificates && \
-  "${DOCKER_BUILD}"/scripts/custom-ssl/nodejs/add-certificate-to-server.sh \
+    "/usr/local/share/ca-certificates" && \
+  "${DOCKER_BUILD}/scripts/custom-ssl/nodejs/add-certificate-to-server.sh" \
     "/etc/ssl/certs/ProxyCA.pem" \
     "/home/node" && \
   npm install pm2 -g
