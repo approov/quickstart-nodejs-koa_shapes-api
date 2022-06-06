@@ -29,6 +29,11 @@ Show_Help() {
                   $ ./deploy --from-current
 
 
+  COMMANDS:
+
+  logs            Tails the logs on the remote server:
+                  $ ./deploy logs
+
 EOF
 }
 
@@ -61,6 +66,10 @@ SSH_Remote_Docker_Load() {
     ssh \
       -p "${REMOTE_PORT}" "${REMOTE_USER}"@"${REMOTE_ADDRESS}" \
       "gzip -d | sudo docker load"
+}
+
+Tail_Remote_Logs() {
+  SSH_Remote_Execute "cd /home/ec2-user/staging.shapes.demo.approov.io && sudo docker-compose logs --follow node"
 }
 
 Main() {
@@ -98,6 +107,12 @@ Main() {
         Show_Help
         exit $?
       ;;
+
+      logs )
+        Tail_Remote_Logs
+        exit $?
+      ;;
+
     esac
   done
 
