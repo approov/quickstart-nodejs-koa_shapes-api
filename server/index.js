@@ -4,9 +4,9 @@ const env = require('dotenv');
 
 // ORDER OF THE ENV FILES MATTERS
 console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
-env.config({path: '.env', debug: true})
-console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
 env.config({path: '.env.default', debug: true});
+console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
+env.config({path: '.env', debug: true})
 console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
 
 const { debug } = require('./utils');

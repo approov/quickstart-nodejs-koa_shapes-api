@@ -2,6 +2,21 @@ version: "2.3"
 
 services:
 
+  dev:
+    image: ${DOCKER_IMAGE:-approov2/shapes-node-koa:dev}
+    build: .
+    env_file:
+      # ORDER OF THE ENV FILES MATTERS
+      - .env.default
+      - .env
+    working_dir: "/home/node/app"
+    volumes:
+      - ./:/home/node/app
+    ports:
+      - 127.0.0.1:${HTTP_PORT:-8002}:${HTTP_PORT:-8002}
+    networks:
+      - default
+
   node:
     image: ${DOCKER_IMAGE:-approov2/shapes-node-koa}
     build: .
