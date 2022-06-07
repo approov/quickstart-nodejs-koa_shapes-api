@@ -6,7 +6,9 @@ services:
     image: ${DOCKER_IMAGE:-approov2/shapes-node-koa:dev}
     build: .
     env_file:
-      # ORDER OF THE ENV FILES MATTERS
+      # ORDER OF THE ENV FILES MATTERS - definitions in later files override
+      # earlier ones. No environment variables are inherited from the host
+      # environment
       - .env.default
       - .env
     working_dir: "/home/node/app"
@@ -22,7 +24,9 @@ services:
     build: .
     restart: always
     env_file:
-      # ORDER OF THE ENV FILES MATTERS
+      # ORDER OF THE ENV FILES MATTERS - definitions in later files override
+      # earlier ones. No environment variables are inherited from the host
+      # environment
       - .env.default
       - .env
     networks:

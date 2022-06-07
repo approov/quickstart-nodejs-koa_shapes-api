@@ -2,12 +2,12 @@
 
 const env = require('dotenv');
 
-// ORDER OF THE ENV FILES MATTERS
-console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
-env.config({path: '.env.default', debug: true});
-console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
+// ORDER OF THE ENV FILES MATTERS - existing environment takes precedence, then
+// earlier files over later ones. Note that running it with docker compose,
+// these files have no effect because docker-compose has already applied them
+// to the local envirmonment as part of "...compose up".
 env.config({path: '.env', debug: true})
-console.log(`process.env.ALLOW_DEBUG_TOKENS: ${process.env.ALLOW_DEBUG_TOKENS}`)
+env.config({path: '.env.default', debug: true});
 
 const { debug } = require('./utils');
 
