@@ -87,3 +87,7 @@ typings/
 .dynamodb/
 
 .Trash-1000/
+
+.local/
+.env.*
+!.env.sample
