@@ -49,8 +49,7 @@ COPY --chown=node:node ./server ./server
 COPY --chown=node:node ./package.json ./package.json
 COPY --chown=node:node ./package-lock.json ./package-lock.json
 
-RUN npm install && \
-  npm audit fix
+RUN npm install
 
 # Start the app
 CMD [ "pm2-runtime", "server/index.js" ]

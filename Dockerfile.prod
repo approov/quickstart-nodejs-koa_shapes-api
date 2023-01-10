@@ -39,8 +39,7 @@ RUN \
   git checkout "${BUILD_RELEASE_FROM}" && \
   ls -al
 
-RUN npm install && \
-  npm audit fix
+RUN npm install
 
 # Start the app
 CMD [ "pm2-runtime", "server/index.js" ]
