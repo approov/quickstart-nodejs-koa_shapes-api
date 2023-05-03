@@ -66,6 +66,11 @@ const invite = `<!DOCTYPE html>
 
 const router = new Router();
 
+router.get('/robots.txt', async ctx => {
+    ctx.type = 'text/plain'
+    ctx.body = "User-agent: *\nDisallow: /";
+});
+
 router.get('/', async ctx => {
   debug(`text: ${invite}`);
   ctx.type = 'html';
