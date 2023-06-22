@@ -116,3 +116,63 @@ From your machine execute:
 ```
 
 Booting `prod` is not supported.
+
+
+## Troubleshooting Deployment
+
+Otherwise stated run the commands in the remote server from the folder of the target deployment.
+
+The deployment creates only 3 files in the remote server:
+* `.env` - contains specific env vars for the deployment and env vars to override the `.env.default` ones. This is the most important file to look at when gathering info about a deployment
+* `.env.default` - the env vars with the default values, which is tracked by git. Customise this env vars by adding them to the `.env` file.
+* `docker-compose.yml` - used to start the docker service `node` with the `DOCKER_IMAGE` and `PUBLIC_DOMAIN` set in the `.env` file.
+
+### HTTPS doesn't' work
+
+If you visit the domain for the server in the browser and it doesn't trust in the provided certificate then this means an error occurred while Traefik was trying to create the LetsEncrypt certificate on the fly.
+
+Check the logs at `/opt/treafik` by running from this folder the command:
+
+```console
+sudo docker-compose logs
+```
+
+Look in the output for error messages related to certificates and handle them accordingly.
+
+After solving the error you may need to restart Traefik:
+
+```console
+sudo docker-compose down
+sudo docker-compose up --detach
+```
+
+Tail the logs to watch for errors:
+
+```console
+sudo docker-compose logs --follow
+```
+
+### Find which Domain(s) were Used
+
+```console
+grep -irn PUBLIC_DOMAIN .env
+```
+
+If you are in the correct folder you should see a result with the domain(s) being used.
+
+### Find which Docker Image was Used
+
+```console
+grep -irn DOCKER_IMAGE .env
+```
+
+If you are in the correct folder you should see a result with the docker image being used.
+
+### Find which Branch was Used
+
+```console
+grep -irn BUILD_RELEASE_FROM .env
+```
+
+If you are in the correct folder you should see a result with name of the branch.
+
