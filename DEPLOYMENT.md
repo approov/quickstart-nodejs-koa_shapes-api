@@ -34,9 +34,10 @@ REMOTE_ADDRESS=___SSH_REMOTE_ADDRESS_HERE___
 # SHAPES SERVER SPECIFIC
 ############################
 
-# If the server has already been deployed at least once then API_KEY and
-# APPROOV_SECRET values can be populated in this file by executing:
-#  $ ./deploy --env prod update-env
+# If the server has already been deployed at least once then you can copy the
+# contents of the remote .env file to this file to have API_KEY and
+# APPROOV_SECRET correct values.
+# Execute from your terminal the command:
 
 # Get it from the VAULT or from the production server
 API_KEY=___API_KEY_HERE___
