@@ -89,21 +89,32 @@ Setup_Configuration() {
 
   case "${RELEASE_ENV}" in
     "dev" | "staging" )
-      DOMAINS="${HOST_USER}.${RELEASE_ENV}.${BASE_PUBLIC_DOMAIN}"
-      REMOTE_APP_DIR="${REMOTE_HOME}/${HOST_USER}/${DOMAINS}"
-      DOCKER_IMAGE="${HOST_USER}/${DOMAINS}:${DATETIME}"
+      DOMAIN="${HOST_USER}.${RELEASE_ENV}.${APP_NAME}.${BASE_DOMAIN}"
+      REMOTE_APP_DIR="${REMOTE_HOME}/${HOST_USER}/${DOMAIN}"
+      DOCKER_IMAGE="${HOST_USER}/${DOMAIN}:${DATETIME}"
+      DOMAINS="${DOMAIN}"
     ;;
 
     "prod" )
-      local shapes_domain="shapes.approov.io"
-      DOMAINS="${BASE_PUBLIC_DOMAIN},${shapes_domain}"
-      REMOTE_APP_DIR="${REMOTE_HOME}/${shapes_domain}"
-      DOCKER_IMAGE="${APP_VENDOR}/${shapes_domain}:${DATETIME}"
+      DOMAIN="${APP_NAME}.${BASE_DOMAIN}"
+      REMOTE_APP_DIR="${REMOTE_HOME}/${DOMAIN}"
+      DOCKER_IMAGE="${APP_VENDOR}/${DOMAIN}:${DATETIME}"
+
+      DOMAINS="${DOMAIN}"
+
+      case "${BASE_DOMAIN}" in
+        "demo.approov.io" )
+          printf "\n---> INFO: You are deploying to env 'prod' on demo.approov.io, thereby shapes.approov.io was added, because it's being used in Approov quickstarts.\n"
+          DOMAINS="${DOMAINS},shapes.approov.io"
+        ;;
+      esac
     ;;
 
     * )
       Exit_With_Error "Invalid value for --env flag. Please provide one of dev, staging or prod."
   esac
+
+  exit 1
 }
 
 SSH_Remote_Execute() {
@@ -284,12 +295,13 @@ Main() {
   local DATETIME=$(date +%s)
 
   local APP_VENDOR=approov
+  local APP_NAME=shapes
 
   local REMOTE_PORT=22
   local REMOTE_ADDRESS=demo.approov.io
 
   local RELEASE_ENV=dev
-  local BASE_PUBLIC_DOMAIN=shapes.demo.approov.io
+  local BASE_DOMAIN=demo.approov.io
   local BUILD_RELEASE_FROM=master
   local LOCAL_DEPLOY_DIR=.local/deploy
   local ENV_FILE_TO_USE=remote
